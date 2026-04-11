@@ -48,13 +48,8 @@ export default function Home() {
 
       {/* Hero */}
       <section className="mx-auto max-w-6xl px-6 pb-8 pt-16 text-center">
-        <Badge
-          variant="secondary"
-          className="mb-5 inline-flex rounded-full border border-zinc-200 bg-white px-3 py-1 text-xs font-medium text-zinc-500 shadow-sm"
-        >
-          Favicon Generator
-        </Badge>
-        <h1 className="text-balance text-4xl font-semibold tracking-tight text-zinc-900 sm:text-5xl">
+       
+        <h1 className="text-balance text-5xl font-semibold tracking-tight text-zinc-900 sm:text-5xl">
           Generate a favicon that
           <br />
           <span className="text-zinc-400">actually looks good</span>
