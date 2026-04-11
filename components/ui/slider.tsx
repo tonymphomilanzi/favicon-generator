@@ -1,8 +1,8 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { Slider as SliderPrimitive } from "radix-ui"
-import { cn } from "@/lib/utils"
+import * as React from "react";
+import { Slider as SliderPrimitive } from "radix-ui";
+import { cn } from "@/lib/utils";
 
 function Slider({
   className,
@@ -18,10 +18,10 @@ function Slider({
       Array.isArray(value)
         ? value
         : Array.isArray(defaultValue)
-          ? defaultValue
-          : [min, max],
+        ? defaultValue
+        : [min, max],
     [value, defaultValue, min, max]
-  )
+  );
 
   return (
     <SliderPrimitive.Root
@@ -32,7 +32,7 @@ function Slider({
       max={max}
       orientation={orientation}
       className={cn(
-        "relative flex w-full touch-none items-center select-none data-disabled:opacity-50",
+        "relative flex w-full touch-none select-none items-center data-disabled:opacity-50",
         orientation === "vertical"
           ? "h-full min-h-40 w-auto flex-col"
           : "flex-row",
@@ -50,7 +50,7 @@ function Slider({
         <SliderPrimitive.Range
           data-slot="slider-range"
           className={cn(
-            "absolute bg-primary",
+            "absolute bg-zinc-900",
             orientation === "vertical" ? "w-full" : "h-full"
           )}
         />
@@ -59,11 +59,11 @@ function Slider({
         <SliderPrimitive.Thumb
           data-slot="slider-thumb"
           key={index}
-          className="relative block size-4 shrink-0 rounded-full border border-zinc-300 bg-white shadow-md ring-ring/50 transition-[color,box-shadow] select-none after:absolute after:-inset-2 hover:ring-2 hover:ring-ring/50 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none active:ring-2 disabled:pointer-events-none disabled:opacity-50"
+          className="relative block size-4 shrink-0 rounded-full border border-zinc-300 bg-white shadow-md transition-[color,box-shadow] select-none after:absolute after:-inset-2 hover:ring-2 hover:ring-zinc-300 focus-visible:ring-2 focus-visible:ring-zinc-400 focus-visible:outline-none active:ring-2 disabled:pointer-events-none disabled:opacity-50"
         />
       ))}
     </SliderPrimitive.Root>
-  )
+  );
 }
 
-export { Slider }
+export { Slider };

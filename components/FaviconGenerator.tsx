@@ -23,15 +23,21 @@ import {
   Lock,
   Type,
   Hash,
+  Sparkles,
 } from "lucide-react";
 import JSZip from "jszip";
 import { saveAs } from "file-saver";
+import {
+  FaviconCustomTab,
+  type CustomContent,
+} from "@/components/FaviconCustomTab";
+import { FaviconHistory, saveToHistory, loadHistory } from "@/components/FaviconHistory";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 type ShapeType = "square" | "rounded" | "circle";
 type BgType = "solid" | "gradient" | "transparent";
-type InputMode = "text" | "icon";
+type InputMode = "text" | "icon" | "custom";
 
 interface FaviconConfig {
   inputMode: InputMode;
@@ -100,12 +106,72 @@ const DEFAULT_CONFIG: FaviconConfig = {
   fontWeight: "700",
 };
 
+// ─── ICO builder ─────────────────────────────────────────────────────────────
+
+async function buildIco(canvases: HTMLCanvasElement[]): Promise<Blob> {
+  const images: { data: Uint8Array; width: number; height: number }[] = [];
+
+  for (const canvas of canvases) {
+    const blob = await new Promise<Blob>((res) =>
+      canvas.toBlob((b) => res(b!), "image/png")
+    );
+    const ab = await blob.arrayBuffer();
+    images.push({
+      data: new Uint8Array(ab),
+      width: canvas.width,
+      height: canvas.height,
+    });
+  }
+
+  // ICO header: 6 bytes
+  // Each directory entry: 16 bytes
+  // Then image data
+  const headerSize = 6;
+  const dirEntrySize = 16;
+  const dirSize = dirEntrySize * images.length;
+  const totalSize =
+    headerSize +
+    dirSize +
+    images.reduce((a, img) => a + img.data.length, 0);
+
+  const buf = new ArrayBuffer(totalSize);
+  const view = new DataView(buf);
+
+  // Header
+  view.setUint16(0, 0, true); // reserved
+  view.setUint16(2, 1, true); // type: ICO
+  view.setUint16(4, images.length, true); // count
+
+  let offset = headerSize + dirSize;
+
+  images.forEach((img, i) => {
+    const dirOffset = headerSize + i * dirEntrySize;
+    const w = img.width >= 256 ? 0 : img.width;
+    const h = img.height >= 256 ? 0 : img.height;
+    view.setUint8(dirOffset + 0, w);
+    view.setUint8(dirOffset + 1, h);
+    view.setUint8(dirOffset + 2, 0); // color count
+    view.setUint8(dirOffset + 3, 0); // reserved
+    view.setUint16(dirOffset + 4, 1, true); // planes
+    view.setUint16(dirOffset + 6, 32, true); // bit count
+    view.setUint32(dirOffset + 8, img.data.length, true); // size
+    view.setUint32(dirOffset + 12, offset, true); // offset
+
+    new Uint8Array(buf).set(img.data, offset);
+    offset += img.data.length;
+  });
+
+  return new Blob([buf], { type: "image/x-icon" });
+}
+
 // ─── Draw helper ──────────────────────────────────────────────────────────────
 
-function drawFavicon(
+async function drawFavicon(
   canvas: HTMLCanvasElement,
   config: FaviconConfig,
-  size: number = CANVAS_SIZE
+  size: number = CANVAS_SIZE,
+  customContent: CustomContent = null,
+  customText: string = "F"
 ) {
   const ctx = canvas.getContext("2d");
   if (!ctx) return;
@@ -121,6 +187,7 @@ function drawFavicon(
       ? size * 0.22
       : 0;
 
+  // Clip to shape
   ctx.beginPath();
   if (config.shape === "circle") {
     ctx.arc(size / 2, size / 2, size / 2, 0, Math.PI * 2);
@@ -131,6 +198,7 @@ function drawFavicon(
   ctx.save();
   ctx.clip();
 
+  // Background
   if (config.bgType !== "transparent") {
     if (config.bgType === "gradient") {
       const angle = (config.gradientDir * Math.PI) / 180;
@@ -150,6 +218,86 @@ function drawFavicon(
 
   ctx.restore();
 
+  // ── Custom content ──────────────────────────────────────────────────────
+  if (config.inputMode === "custom" && customContent) {
+    const pad = (config.padding / 100) * size;
+    const innerSize = size - pad * 2;
+
+    if (customContent.type === "svg") {
+      // Render SVG via Image
+      const blob = new Blob([customContent.svgString], {
+        type: "image/svg+xml",
+      });
+      const url = URL.createObjectURL(blob);
+      await new Promise<void>((resolve) => {
+        const img = new Image();
+        img.onload = () => {
+          ctx.save();
+          // Re-clip for custom content
+          ctx.beginPath();
+          if (config.shape === "circle") {
+            ctx.arc(size / 2, size / 2, size / 2, 0, Math.PI * 2);
+          } else {
+            ctx.roundRect(0, 0, size, size, radius);
+          }
+          ctx.clip();
+          ctx.drawImage(img, pad, pad, innerSize, innerSize);
+          ctx.restore();
+          URL.revokeObjectURL(url);
+          resolve();
+        };
+        img.onerror = () => {
+          URL.revokeObjectURL(url);
+          resolve();
+        };
+        img.src = url;
+      });
+    } else if (customContent.type === "image") {
+      await new Promise<void>((resolve) => {
+        const img = new Image();
+        img.onload = () => {
+          ctx.save();
+          ctx.beginPath();
+          if (config.shape === "circle") {
+            ctx.arc(size / 2, size / 2, size / 2, 0, Math.PI * 2);
+          } else {
+            ctx.roundRect(0, 0, size, size, radius);
+          }
+          ctx.clip();
+          // Cover fit
+          const aspect = img.width / img.height;
+          let sx = 0, sy = 0, sw = img.width, sh = img.height;
+          if (aspect > 1) {
+            sw = img.height;
+            sx = (img.width - sw) / 2;
+          } else {
+            sh = img.width;
+            sy = (img.height - sh) / 2;
+          }
+          ctx.drawImage(img, sx, sy, sw, sh, pad, pad, innerSize, innerSize);
+          ctx.restore();
+          resolve();
+        };
+        img.onerror = () => resolve();
+        img.src = customContent.dataUrl;
+      });
+    } else if (customContent.type === "font") {
+      // Use custom font for text rendering
+      const text = customText.slice(0, 2) || "F";
+      const fontSizePx =
+        (config.fontSize / 100) * size * (size / CANVAS_SIZE);
+      ctx.save();
+      ctx.font = `${config.fontWeight} ${fontSizePx}px '${customContent.fontFamily}', sans-serif`;
+      ctx.fillStyle = config.fgColor;
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(text, size / 2, size / 2 + fontSizePx * 0.04);
+      ctx.restore();
+    }
+    return;
+  }
+
+  // ── Text / Symbol ──────────────────────────────────────────────────────
   const content =
     config.inputMode === "text" ? config.text : config.selectedIcon;
   const displayText = content.slice(0, 2);
@@ -168,9 +316,13 @@ function drawFavicon(
 
 export default function FaviconGenerator() {
   const [config, setConfig] = useState<FaviconConfig>(DEFAULT_CONFIG);
+  const [customContent, setCustomContent] = useState<CustomContent>(null);
+  const [customText, setCustomText] = useState("F");
   const [copied, setCopied] = useState(false);
   const [darkPreview, setDarkPreview] = useState(false);
   const [downloading, setDownloading] = useState(false);
+  const [historyKey, setHistoryKey] = useState(0);
+  const [hasHistory, setHasHistory] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   const update = useCallback(
@@ -180,11 +332,34 @@ export default function FaviconGenerator() {
     []
   );
 
+  // Check if history exists on mount
+  useEffect(() => {
+    setHasHistory(loadHistory().length > 0);
+  }, [historyKey]);
+
+  // Redraw canvas on config/custom change
   useEffect(() => {
     if (canvasRef.current) {
-      drawFavicon(canvasRef.current, config, CANVAS_SIZE);
+      drawFavicon(canvasRef.current, config, CANVAS_SIZE, customContent, customText);
     }
-  }, [config]);
+  }, [config, customContent, customText]);
+
+  // Auto-save to history (debounced)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (!canvasRef.current) return;
+      const dataUrl = canvasRef.current.toDataURL("image/png");
+      const label =
+        config.inputMode === "text"
+          ? config.text || "F"
+          : config.inputMode === "icon"
+          ? config.selectedIcon
+          : customContent?.name || "Custom";
+      saveToHistory(dataUrl, label, config as unknown as Record<string, unknown>);
+      setHistoryKey((k) => k + 1);
+    }, 1500);
+    return () => clearTimeout(timer);
+  }, [config, customContent, customText]);
 
   const htmlSnippet = `<!-- Favicon — Generated by FaviconKit -->
 <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
@@ -217,6 +392,8 @@ export default function FaviconGenerator() {
     2
   );
 
+  // ── Download ────────────────────────────────────────────────────────────
+
   const handleDownload = async () => {
     setDownloading(true);
     try {
@@ -234,14 +411,25 @@ export default function FaviconGenerator() {
         512: "android-chrome-512x512.png",
       };
 
+      const icoCanvases: HTMLCanvasElement[] = [];
+
       for (const size of EXPORT_SIZES) {
         const offscreen = document.createElement("canvas");
-        drawFavicon(offscreen, config, size);
+        await drawFavicon(offscreen, config, size, customContent, customText);
         const blob = await new Promise<Blob>((res) =>
           offscreen.toBlob((b) => res(b!), "image/png")
         );
         folder.file(sizeNames[size], blob);
+
+        // Collect 16, 32, 48 for ICO
+        if ([16, 32, 48].includes(size)) {
+          icoCanvases.push(offscreen);
+        }
       }
+
+      // Build ICO
+      const icoBlob = await buildIco(icoCanvases);
+      folder.file("favicon.ico", icoBlob);
 
       folder.file("site.webmanifest", manifestContent);
       folder.file(
@@ -249,7 +437,7 @@ export default function FaviconGenerator() {
         `FAVICON PACKAGE — Generated by FaviconKit
 ==========================================
 
-STEP 1: Upload all .png files and site.webmanifest to your website root directory.
+STEP 1: Upload all .png files, favicon.ico, and site.webmanifest to your website root directory.
 
 STEP 2: Paste this into your <head>:
 
@@ -270,11 +458,21 @@ For Webflow: upload via Site Settings > Favicon
     }
   };
 
+  // ── Copy ─────────────────────────────────────────────────────────────────
+
   const handleCopy = () => {
     navigator.clipboard.writeText(htmlSnippet);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
+
+  // ── Restore from history ─────────────────────────────────────────────────
+
+  const handleRestore = (cfg: Record<string, unknown>) => {
+    setConfig(cfg as unknown as FaviconConfig);
+  };
+
+  // ─── Render ───────────────────────────────────────────────────────────────
 
   return (
     <TooltipProvider>
@@ -400,7 +598,14 @@ For Webflow: upload via Site Settings > Favicon
                               imageRendering: "auto",
                             }}
                             ref={(el) => {
-                              if (el) drawFavicon(el, config, CANVAS_SIZE);
+                              if (el)
+                                drawFavicon(
+                                  el,
+                                  config,
+                                  CANVAS_SIZE,
+                                  customContent,
+                                  customText
+                                );
                             }}
                           />
                           <span className="text-[10px] text-zinc-400">
@@ -483,11 +688,17 @@ For Webflow: upload via Site Settings > Favicon
                   variant="secondary"
                   className="ml-1 rounded-full bg-white/10 px-2 py-0 text-[10px] font-medium text-white/80"
                 >
-                  8 files + HTML
+                  8 PNG + ICO + HTML
                 </Badge>
               </span>
             )}
           </Button>
+
+          {/* History */}
+          <FaviconHistory
+            key={historyKey}
+            onRestore={handleRestore}
+          />
         </div>
 
         {/* ── Right col — controls ── */}
@@ -517,10 +728,17 @@ For Webflow: upload via Site Settings > Favicon
                   <Hash className="h-3.5 w-3.5" strokeWidth={2} />
                   Symbol
                 </TabsTrigger>
+                <TabsTrigger
+                  value="custom"
+                  className="flex flex-1 items-center justify-center gap-1.5 rounded-lg text-xs font-medium data-[state=active]:bg-white data-[state=active]:shadow-sm"
+                >
+                  <Sparkles className="h-3.5 w-3.5" strokeWidth={2} />
+                  Custom
+                </TabsTrigger>
               </TabsList>
             </Tabs>
 
-            {config.inputMode === "text" ? (
+            {config.inputMode === "text" && (
               <div>
                 <input
                   type="text"
@@ -534,7 +752,9 @@ For Webflow: upload via Site Settings > Favicon
                   Up to 2 characters — initials work great
                 </p>
               </div>
-            ) : (
+            )}
+
+            {config.inputMode === "icon" && (
               <div className="grid grid-cols-5 gap-2">
                 {CURATED_ICONS.map((icon) => (
                   <button
@@ -550,6 +770,15 @@ For Webflow: upload via Site Settings > Favicon
                   </button>
                 ))}
               </div>
+            )}
+
+            {config.inputMode === "custom" && (
+              <FaviconCustomTab
+                customContent={customContent}
+                customText={customText}
+                onCustomContentChange={setCustomContent}
+                onCustomTextChange={setCustomText}
+              />
             )}
           </Card>
 
@@ -651,7 +880,6 @@ For Webflow: upload via Site Settings > Favicon
                       </div>
                     </div>
 
-                    {/* Direction slider */}
                     <div>
                       <div className="mb-2 flex items-center justify-between">
                         <span className="text-xs text-zinc-500">
@@ -709,7 +937,10 @@ For Webflow: upload via Site Settings > Favicon
               </div>
             </div>
 
-            {config.inputMode === "text" && (
+            {/* Text / font color — show for text mode and custom font mode */}
+            {(config.inputMode === "text" ||
+              (config.inputMode === "custom" &&
+                customContent?.type === "font")) && (
               <div className="mb-4">
                 <p className="mb-2 text-xs text-zinc-500">Text color</p>
                 <div className="flex items-center gap-3">
@@ -737,7 +968,10 @@ For Webflow: upload via Site Settings > Favicon
               </div>
             )}
 
-            {config.inputMode === "text" && (
+            {/* Font weight — text mode and custom font mode */}
+            {(config.inputMode === "text" ||
+              (config.inputMode === "custom" &&
+                customContent?.type === "font")) && (
               <div className="mb-4">
                 <p className="mb-2 text-xs text-zinc-500">Font weight</p>
                 <div className="flex gap-2">
@@ -803,7 +1037,11 @@ For Webflow: upload via Site Settings > Favicon
           {/* Reset */}
           <Button
             variant="outline"
-            onClick={() => setConfig(DEFAULT_CONFIG)}
+            onClick={() => {
+              setConfig(DEFAULT_CONFIG);
+              setCustomContent(null);
+              setCustomText("F");
+            }}
             className="w-full rounded-2xl border-zinc-200 text-xs font-medium text-zinc-500 hover:text-zinc-900"
           >
             <span className="flex items-center gap-1.5">
