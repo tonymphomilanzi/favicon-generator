@@ -63,7 +63,7 @@ export default function Home() {
 
         {/* Trust bar */}
         <div className="mt-8 flex flex-wrap items-center justify-center gap-6">
-          {trustItems.map((item) => (
+        {/**   {trustItems.map((item) => (
             <div
               key={item.label}
               className="flex items-center gap-1.5 text-xs text-zinc-400"
@@ -71,7 +71,7 @@ export default function Home() {
               <Check className="h-3.5 w-3.5 text-zinc-400" strokeWidth={2.5} />
               <span>{item.label}</span>
             </div>
-          ))}
+          ))}**/}
         </div>
       </section>
 
