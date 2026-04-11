@@ -29,8 +29,20 @@ export default function Home() {
           </div>
 
           {/* Buy me a coffee */}
-         
-          <script type='text/javascript' src='https://storage.ko-fi.com/cdn/widget/Widget_2.js'></script><script type='text/javascript'>kofiwidget2.init('Support me on Ko-fi', '#72a4f2', 'D1D71J1FCR');kofiwidget2.draw();</script> 
+          <a
+            href="https://ko-fi.com/tonymphomilanzi"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="group flex items-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-3.5 py-1.5 text-xs font-medium text-amber-700 shadow-sm transition-all hover:border-amber-300 hover:bg-amber-100 hover:shadow-md"
+          >
+            <Coffee
+              className="h-3.5 w-3.5 text-amber-500 transition-transform group-hover:rotate-12"
+              strokeWidth={2}
+            />
+            Support on Ko-fi
+          </a>
+
+          
         </div>
       </nav>
 
