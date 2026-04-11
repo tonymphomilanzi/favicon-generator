@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
-import { GeistSans } from "geist/font/sans";
+import { Inter } from "next/font/google";
 import "./globals.css";
+
+const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Favicon Generator — Free & Instant | FaviconKit",
@@ -11,21 +13,8 @@ export const metadata: Metadata = {
     "free favicon maker",
     "favicon png",
     "apple touch icon generator",
-    "favicon ico generator",
     "website icon generator",
   ],
-  openGraph: {
-    title: "Favicon Generator — Free & Instant",
-    description:
-      "Create your favicon package in seconds. PNG, ICO, Apple Touch Icon + HTML snippet included.",
-    type: "website",
-    url: "https://faviconkit.com",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Favicon Generator — Free & Instant",
-    description: "Generate a complete favicon package in seconds. Free, no signup.",
-  },
   robots: {
     index: true,
     follow: true,
@@ -39,7 +28,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${GeistSans.className} antialiased`}>{children}</body>
+      <body className={`${inter.className} antialiased`}>{children}</body>
     </html>
   );
 }

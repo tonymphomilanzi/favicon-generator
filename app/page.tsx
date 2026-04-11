@@ -290,6 +290,6 @@ const faqs = [
   },
   {
     q: "What is the difference between ICO and PNG favicons?",
-    a: "ICO is the legacy format supported by all browsers including very old versions of Internet Explorer. PNG is the modern standard supported by all current browsers and is what FaviconKit generates. For almost all use cases in 2026, PNG favicons are the right choice.",
+    a: "ICO is the legacy format supported by all browsers including very old versions of Internet Explorer. PNG is the modern standard supported by all current browsers and is what FaviconKit generates. For almost all use cases in 2024, PNG favicons are the right choice.",
   },
 ];
