@@ -9,6 +9,7 @@ import {
   Smartphone,
   Palette,
   Check,
+  Coffee,
 } from "lucide-react";
 
 export default function Home() {
@@ -17,6 +18,7 @@ export default function Home() {
       {/* Nav */}
       <nav className="sticky top-0 z-50 border-b border-zinc-200/80 bg-white/80 backdrop-blur-xl">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
+          {/* Logo */}
           <div className="flex items-center gap-2.5">
             <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-zinc-900">
               <span className="text-xs font-bold text-white">F</span>
@@ -25,12 +27,10 @@ export default function Home() {
               FaviconKit
             </span>
           </div>
-          <Badge
-            variant="secondary"
-            className="rounded-full border border-zinc-200 bg-white text-xs font-medium text-zinc-600 shadow-sm"
-          >
-            100% Free · No signup
-          </Badge>
+
+          {/* Buy me a coffee */}
+         
+          <script type='text/javascript' src='https://storage.ko-fi.com/cdn/widget/Widget_2.js'></script><script type='text/javascript'>kofiwidget2.init('Support me on Ko-fi', '#72a4f2', 'D1D71J1FCR');kofiwidget2.draw();</script> 
         </div>
       </nav>
 
@@ -118,7 +118,6 @@ export default function Home() {
           <div className="relative space-y-0">
             {steps.map((step, i) => (
               <div key={step.title} className="flex gap-5">
-                {/* Spine */}
                 <div className="flex flex-col items-center">
                   <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full border border-zinc-200 bg-white shadow-sm">
                     <span className="text-xs font-semibold text-zinc-700">
@@ -129,7 +128,6 @@ export default function Home() {
                     <div className="mt-1 w-px flex-1 bg-zinc-200" />
                   )}
                 </div>
-                {/* Content */}
                 <div className={`pb-8 pt-1 ${i === steps.length - 1 ? "pb-0" : ""}`}>
                   <p className="mb-1 text-sm font-semibold text-zinc-900">
                     {step.title}
@@ -144,7 +142,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* FAQ for SEO */}
+      {/* FAQ */}
       <section className="border-t border-zinc-200 bg-white">
         <div className="mx-auto max-w-3xl px-6 py-20">
           <h2 className="mb-3 text-center text-2xl font-semibold tracking-tight text-zinc-900">
@@ -173,6 +171,7 @@ export default function Home() {
       <footer className="border-t border-zinc-200 bg-[#fafafa]">
         <div className="mx-auto max-w-6xl px-6 py-8">
           <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
+            {/* Brand */}
             <div className="flex items-center gap-2">
               <div className="flex h-6 w-6 items-center justify-center rounded-md bg-zinc-900">
                 <span className="text-[10px] font-bold text-white">F</span>
@@ -181,14 +180,25 @@ export default function Home() {
                 FaviconKit
               </span>
             </div>
+
             <p className="text-xs text-zinc-400">
               © {new Date().getFullYear()} FaviconKit · Built for developers
               &amp; indie makers
             </p>
-            <div className="flex items-center gap-1.5 text-xs text-zinc-400">
-              <div className="h-1.5 w-1.5 rounded-full bg-green-400" />
-              All systems operational
-            </div>
+
+            {/* Coffee in footer too */}
+            <a
+              href="https://buymeacoffee.com/yourusername"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group flex items-center gap-1.5 text-xs text-zinc-400 transition-colors hover:text-amber-500"
+            >
+              <Coffee
+                className="h-3.5 w-3.5 transition-transform group-hover:rotate-12"
+                strokeWidth={2}
+              />
+              Buy me a coffee
+            </a>
           </div>
         </div>
       </footer>
@@ -247,9 +257,9 @@ const features = [
 
 const steps = [
   {
-    title: "Enter your text, emoji, or pick a symbol",
+    title: "Enter your text or pick a symbol",
     description:
-      "Type one or two characters, your brand initials, or choose from a curated set of clean symbols. No design software needed.",
+      "Type one or two characters, your brand initials, or choose from a curated set of clean unicode symbols. No design software needed.",
   },
   {
     title: "Customize colors, shape, and style",

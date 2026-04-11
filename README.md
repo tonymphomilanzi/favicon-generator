@@ -1,36 +1,40 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# FaviconKit
 
-## Getting Started
+A fast, free, and fully client-side favicon generator built with Next.js, Tailwind CSS, and shadcn/ui. Generate a complete favicon package in seconds — no signup, no uploads, no server required.
 
-First, run the development server:
+![FaviconKit Preview](./public/preview.png)
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## Live Demo
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+[faviconkit.vercel.app](https://faviconkit.vercel.app)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## What It Does
 
-## Learn More
+Most favicon generators give you one PNG and call it done. FaviconKit gives you everything you need to ship a production-ready favicon setup in under 60 seconds.
 
-To learn more about Next.js, take a look at the following resources:
+**You get:**
+- 8 PNG files at every size browsers and devices expect
+- A `site.webmanifest` for PWA support
+- A ready-to-paste HTML snippet for your `<head>`
+- A `README.txt` inside the ZIP with step-by-step install instructions
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+---
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Features
 
-## Deploy on Vercel
+- **Live browser tab preview** — see exactly how your favicon looks before downloading, with light and dark mode toggle
+- **Text and symbol input** — type your initials, brand letters, or pick from a curated set of unicode symbols
+- **Full color control** — solid colors, linear gradients with presets, or transparent background
+- **Gradient presets** — Midnight, Sunrise, Ocean, Forest, Berry, Slate
+- **Shape options** — square, rounded corners, or circle
+- **Typography controls** — font weight (Regular, Semi, Bold, Black), size slider, padding slider
+- **All export sizes** — 16×16, 32×32, 48×48, 64×64, 96×96, 180×180, 192×192, 512×512
+- **ZIP download** — one click packages everything
+- **Copy HTML snippet** — one click copies the exact code to paste into your head tag
+- **PWA manifest** — `site.webmanifest` generated automatically
+- **100% client-side** — nothing is uploaded anywhere, runs entirely in your browser via Canvas API
+- **SEO optimised** — structured metadata, FAQ section, fast static page
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
