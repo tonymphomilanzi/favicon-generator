@@ -29,18 +29,7 @@ export default function Home() {
           </div>
 
           {/* Buy me a coffee */}
-          <a
-            href="https://ko-fi.com/tonymphomilanzi"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="group flex items-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-3.5 py-1.5 text-xs font-medium text-amber-700 shadow-sm transition-all hover:border-amber-300 hover:bg-amber-100 hover:shadow-md"
-          >
-            <Coffee
-              className="h-3.5 w-3.5 text-amber-500 transition-transform group-hover:rotate-12"
-              strokeWidth={2}
-            />
-            Support on Ko-fi
-          </a>
+         
 
           
         </div>
@@ -55,10 +44,7 @@ export default function Home() {
           <span className="text-zinc-400">actually looks good</span>
         </h1>
         <p className="mt-4 text-balance text-base text-zinc-500">
-          Create a complete favicon package in seconds. Includes PNG, ICO,
-          Apple Touch Icon,
-          <br className="hidden sm:block" /> Android icons, and ready-to-paste
-          HTML — no design skills needed.
+         Create a complete favicon package in seconds — no design skills needed.
         </p>
 
         {/* Trust bar */}
@@ -189,23 +175,22 @@ export default function Home() {
             </div>
 
             <p className="text-xs text-zinc-400">
-              © {new Date().getFullYear()} FaviconKit · Built for developers
-              &amp; indie makers
+              © {new Date().getFullYear()} &nbsp; FaviconKit ·
             </p>
 
             {/* Coffee in footer too */}
             <a
-              href="https://buymeacoffee.com/yourusername"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="group flex items-center gap-1.5 text-xs text-zinc-400 transition-colors hover:text-amber-500"
-            >
-              <Coffee
-                className="h-3.5 w-3.5 transition-transform group-hover:rotate-12"
-                strokeWidth={2}
-              />
-              Buy me a coffee
-            </a>
+            href="https://ko-fi.com/tonymphomilanzi"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="group flex items-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-3.5 py-1.5 text-xs font-medium text-amber-700 shadow-sm transition-all hover:border-amber-300 hover:bg-amber-100 hover:shadow-md"
+          >
+            <Coffee
+              className="h-3.5 w-3.5 text-amber-500 transition-transform group-hover:rotate-12"
+              strokeWidth={2}
+            />
+           Buy me a coffee
+          </a>
           </div>
         </div>
       </footer>
@@ -228,7 +213,7 @@ const features = [
     icon: Package,
     title: "Complete ZIP package",
     description:
-      "Download all sizes at once — 16×16, 32×32, 180×180 Apple Touch, 192×192 and 512×512 Android icons, all in one click.",
+      "Download all sizes at once — 16×16, 32×32, 180×180 Apple Touch, 192×192 and 512×512 Android icons, plus a favicon.ico — all in one click.",
   },
   {
     icon: Monitor,
@@ -246,13 +231,13 @@ const features = [
     icon: Zap,
     title: "100% client-side",
     description:
-      "Nothing is uploaded to any server. Your favicon is generated instantly in your browser using the Canvas API.",
+      "Nothing is uploaded to any server. Your favicon is generated instantly in your browser using the Canvas API — your files never leave your device.",
   },
   {
     icon: Smartphone,
     title: "PWA manifest included",
     description:
-      "site.webmanifest is generated and included in your ZIP automatically, so your site is Progressive Web App ready.",
+      "site.webmanifest is generated and included in your ZIP automatically, so your site is Progressive Web App ready out of the box.",
   },
   {
     icon: Palette,
@@ -260,23 +245,41 @@ const features = [
     description:
       "Solid colors, linear gradients with presets, transparent backgrounds — your favicon adapts to any browser theme.",
   },
+  {
+    icon: Upload,
+    title: "Custom SVG & image upload",
+    description:
+      "Upload your own SVG logo, PNG, JPG, or WebP image and it will be auto-resized and embedded into every favicon size perfectly.",
+  },
+  {
+    icon: Type,
+    title: "Custom font upload",
+    description:
+      "Upload your own TTF, OTF, WOFF, or WOFF2 font file and render your initials or brand mark in your exact typography.",
+  },
+  {
+    icon: FileImage,
+    title: "ICO format export",
+    description:
+      "Legacy ICO format is included in every download — a multi-resolution favicon.ico containing 16×16, 32×32, and 48×48 frames for maximum browser compatibility.",
+  },
 ];
 
 const steps = [
   {
-    title: "Enter your text or pick a symbol",
+    title: "Choose your content type",
     description:
-      "Type one or two characters, your brand initials, or choose from a curated set of clean unicode symbols. No design software needed.",
+      "Type one or two characters, pick a clean unicode symbol, or go fully custom — upload your own SVG logo, image, or brand font. No design software needed.",
   },
   {
     title: "Customize colors, shape, and style",
     description:
-      "Choose a solid color, gradient, or transparent background. Pick your shape — square, rounded, or circle. Adjust size and padding with sliders.",
+      "Choose a solid color, gradient, or transparent background. Pick your shape — square, rounded, or circle. Adjust size and padding with sliders. Upload a custom font to render your text in your exact typography.",
   },
   {
     title: "Download your complete package",
     description:
-      "Get a ZIP with 8 PNG files, a site.webmanifest, a ready-to-paste HTML snippet, and a README with step-by-step instructions.",
+      "Get a ZIP with 8 PNG files, a favicon.ico (16, 32, 48px multi-resolution), a site.webmanifest, a ready-to-paste HTML snippet, and a README with step-by-step instructions.",
   },
 ];
 
@@ -288,6 +291,18 @@ const faqs = [
   {
     q: "What sizes do I need for full browser and device support?",
     a: "At minimum you need 16x16 and 32x32 for desktop browsers, 180x180 for Apple devices, and 192x192 and 512x512 for Android and PWA support. FaviconKit generates all of these plus 48x48, 64x64, and 96x96 for maximum compatibility.",
+  },
+  {
+    q: "Can I upload my own logo or brand icon?",
+    a: "Yes. Switch to the Custom tab and upload any SVG, PNG, JPG, or WebP file. FaviconKit will auto-resize and crop your image to fit every favicon size correctly, with shape clipping applied so it matches your chosen style.",
+  },
+  {
+    q: "Can I use my own custom font?",
+    a: "Yes. Upload any TTF, OTF, WOFF, or WOFF2 font file in the Custom tab and your text will be rendered using that exact typeface across all favicon sizes. The font is loaded entirely in your browser — nothing is sent to a server.",
+  },
+  {
+    q: "What is favicon.ico and do I need it?",
+    a: "ICO is the legacy favicon format supported by all browsers including very old versions of Internet Explorer. FaviconKit generates a multi-resolution favicon.ico containing 16×16, 32×32, and 48×48 frames and includes it in every download for maximum compatibility.",
   },
   {
     q: "How do I add the favicon to my website?",
@@ -307,6 +322,6 @@ const faqs = [
   },
   {
     q: "What is the difference between ICO and PNG favicons?",
-    a: "ICO is the legacy format supported by all browsers including very old versions of Internet Explorer. PNG is the modern standard supported by all current browsers and is what FaviconKit generates. For almost all use cases in 2024, PNG favicons are the right choice.",
+    a: "ICO is the legacy format supported by all browsers including very old versions of Internet Explorer. PNG is the modern standard supported by all current browsers. FaviconKit generates both — PNG files for modern browsers and a favicon.ico for legacy support — so you are covered in every scenario.",
   },
 ];
