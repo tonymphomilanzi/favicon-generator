@@ -2,12 +2,15 @@ import FaviconGenerator from "@/components/FaviconGenerator";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import {
-  Package,
+   Package,
   Monitor,
   ClipboardList,
   Zap,
   Smartphone,
   Palette,
+  Upload,
+  Type,
+  FileImage,
   Check,
   Coffee,
 } from "lucide-react";
