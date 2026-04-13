@@ -19,22 +19,51 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-[#fafafa]">
       {/* Nav */}
+  {/* Nav */}
       <nav className="sticky top-0 z-50 border-b border-zinc-200/80 bg-white/80 backdrop-blur-xl">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-          {/* Logo */}
-          <div className="flex items-center gap-2.5">
+          
+          {/* Logo + Tagline */}
+          <div className="flex items-center gap-3">
             <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-zinc-900">
               <span className="text-xs font-bold text-white">F</span>
             </div>
-            <span className="text-sm font-semibold tracking-tight text-zinc-900">
-              FaviconKit
-            </span>
+            <div className="flex flex-col leading-tight">
+              <span className="text-sm font-semibold tracking-tight text-zinc-900">
+                FaviconKit
+              </span>
+              <span className="text-[10px] text-zinc-400">
+                Generate favicons instantly
+              </span>
+            </div>
           </div>
 
-          {/* Buy me a coffee */}
-         
+          {/* Center Links */}
+          <div className="hidden items-center gap-6 text-sm text-zinc-500 md:flex">
+            <a href="#features" className="transition hover:text-zinc-900">
+              Features
+            </a>
+            <a href="#how" className="transition hover:text-zinc-900">
+              How it works
+            </a>
+            <a href="#faq" className="transition hover:text-zinc-900">
+              FAQ
+            </a>
+          </div>
 
-          
+          {/* Right side */}
+          <div className="flex items-center gap-3">
+            
+           
+
+            {/* CTA */}
+            <a
+              href="#generator"
+              className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-zinc-800"
+            >
+              Generate
+            </a>
+          </div>
         </div>
       </nav>
 
@@ -65,12 +94,12 @@ export default function Home() {
       </section>
 
       {/* Tool */}
-      <section className="mx-auto max-w-6xl px-6 pb-24">
+      <section id="generator" className="mx-auto max-w-6xl px-6 pb-24">
         <FaviconGenerator />
       </section>
 
       {/* Value Props */}
-      <section className="border-t border-zinc-200 bg-white">
+      <section id="features"  className="border-t border-zinc-200 bg-white">
         <div className="mx-auto max-w-6xl px-6 py-20">
           <h2 className="mb-3 text-center text-2xl font-semibold tracking-tight text-zinc-900">
             Everything included, nothing missing
@@ -103,7 +132,7 @@ export default function Home() {
       </section>
 
       {/* How it works */}
-      <section className="border-t border-zinc-200 bg-[#fafafa]">
+      <section id="how" className="border-t border-zinc-200 bg-[#fafafa]">
         <div className="mx-auto max-w-3xl px-6 py-20">
           <h2 className="mb-3 text-center text-2xl font-semibold tracking-tight text-zinc-900">
             How it works
@@ -139,7 +168,7 @@ export default function Home() {
       </section>
 
       {/* FAQ */}
-      <section className="border-t border-zinc-200 bg-white">
+      <section id="faq" className="border-t border-zinc-200 bg-white">
         <div className="mx-auto max-w-3xl px-6 py-20">
           <h2 className="mb-3 text-center text-2xl font-semibold tracking-tight text-zinc-900">
             Frequently asked questions

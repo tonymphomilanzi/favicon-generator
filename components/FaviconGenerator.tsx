@@ -31,13 +31,18 @@ import {
   FaviconCustomTab,
   type CustomContent,
 } from "@/components/FaviconCustomTab";
-import { FaviconHistory, saveToHistory, loadHistory } from "@/components/FaviconHistory";
+import {
+  FaviconHistory,
+  saveToHistory,
+  loadHistory,
+} from "@/components/FaviconHistory";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 type ShapeType = "square" | "rounded" | "circle";
 type BgType = "solid" | "gradient" | "transparent";
 type InputMode = "text" | "icon" | "custom";
+type SnippetFramework = "html" | "nextjs" | "react";
 
 interface FaviconConfig {
   inputMode: InputMode;
@@ -106,7 +111,7 @@ const DEFAULT_CONFIG: FaviconConfig = {
   fontWeight: "700",
 };
 
-// ─── ICO builder ─────────────────────────────────────────────────────────────
+// ─── ICO builder ──────────────────────────────────────────────────────────────
 
 async function buildIco(canvases: HTMLCanvasElement[]): Promise<Blob> {
   const images: { data: Uint8Array; width: number; height: number }[] = [];
@@ -123,9 +128,6 @@ async function buildIco(canvases: HTMLCanvasElement[]): Promise<Blob> {
     });
   }
 
-  // ICO header: 6 bytes
-  // Each directory entry: 16 bytes
-  // Then image data
   const headerSize = 6;
   const dirEntrySize = 16;
   const dirSize = dirEntrySize * images.length;
@@ -137,10 +139,9 @@ async function buildIco(canvases: HTMLCanvasElement[]): Promise<Blob> {
   const buf = new ArrayBuffer(totalSize);
   const view = new DataView(buf);
 
-  // Header
-  view.setUint16(0, 0, true); // reserved
-  view.setUint16(2, 1, true); // type: ICO
-  view.setUint16(4, images.length, true); // count
+  view.setUint16(0, 0, true);
+  view.setUint16(2, 1, true);
+  view.setUint16(4, images.length, true);
 
   let offset = headerSize + dirSize;
 
@@ -150,13 +151,12 @@ async function buildIco(canvases: HTMLCanvasElement[]): Promise<Blob> {
     const h = img.height >= 256 ? 0 : img.height;
     view.setUint8(dirOffset + 0, w);
     view.setUint8(dirOffset + 1, h);
-    view.setUint8(dirOffset + 2, 0); // color count
-    view.setUint8(dirOffset + 3, 0); // reserved
-    view.setUint16(dirOffset + 4, 1, true); // planes
-    view.setUint16(dirOffset + 6, 32, true); // bit count
-    view.setUint32(dirOffset + 8, img.data.length, true); // size
-    view.setUint32(dirOffset + 12, offset, true); // offset
-
+    view.setUint8(dirOffset + 2, 0);
+    view.setUint8(dirOffset + 3, 0);
+    view.setUint16(dirOffset + 4, 1, true);
+    view.setUint16(dirOffset + 6, 32, true);
+    view.setUint32(dirOffset + 8, img.data.length, true);
+    view.setUint32(dirOffset + 12, offset, true);
     new Uint8Array(buf).set(img.data, offset);
     offset += img.data.length;
   });
@@ -187,7 +187,6 @@ async function drawFavicon(
       ? size * 0.22
       : 0;
 
-  // Clip to shape
   ctx.beginPath();
   if (config.shape === "circle") {
     ctx.arc(size / 2, size / 2, size / 2, 0, Math.PI * 2);
@@ -198,7 +197,6 @@ async function drawFavicon(
   ctx.save();
   ctx.clip();
 
-  // Background
   if (config.bgType !== "transparent") {
     if (config.bgType === "gradient") {
       const angle = (config.gradientDir * Math.PI) / 180;
@@ -218,13 +216,11 @@ async function drawFavicon(
 
   ctx.restore();
 
-  // ── Custom content ──────────────────────────────────────────────────────
   if (config.inputMode === "custom" && customContent) {
     const pad = (config.padding / 100) * size;
     const innerSize = size - pad * 2;
 
     if (customContent.type === "svg") {
-      // Render SVG via Image
       const blob = new Blob([customContent.svgString], {
         type: "image/svg+xml",
       });
@@ -233,7 +229,6 @@ async function drawFavicon(
         const img = new Image();
         img.onload = () => {
           ctx.save();
-          // Re-clip for custom content
           ctx.beginPath();
           if (config.shape === "circle") {
             ctx.arc(size / 2, size / 2, size / 2, 0, Math.PI * 2);
@@ -264,9 +259,11 @@ async function drawFavicon(
             ctx.roundRect(0, 0, size, size, radius);
           }
           ctx.clip();
-          // Cover fit
           const aspect = img.width / img.height;
-          let sx = 0, sy = 0, sw = img.width, sh = img.height;
+          let sx = 0,
+            sy = 0,
+            sw = img.width,
+            sh = img.height;
           if (aspect > 1) {
             sw = img.height;
             sx = (img.width - sw) / 2;
@@ -282,7 +279,6 @@ async function drawFavicon(
         img.src = customContent.dataUrl;
       });
     } else if (customContent.type === "font") {
-      // Use custom font for text rendering
       const text = customText.slice(0, 2) || "F";
       const fontSizePx =
         (config.fontSize / 100) * size * (size / CANVAS_SIZE);
@@ -297,7 +293,6 @@ async function drawFavicon(
     return;
   }
 
-  // ── Text / Symbol ──────────────────────────────────────────────────────
   const content =
     config.inputMode === "text" ? config.text : config.selectedIcon;
   const displayText = content.slice(0, 2);
@@ -318,11 +313,12 @@ export default function FaviconGenerator() {
   const [config, setConfig] = useState<FaviconConfig>(DEFAULT_CONFIG);
   const [customContent, setCustomContent] = useState<CustomContent>(null);
   const [customText, setCustomText] = useState("F");
-  const [copied, setCopied] = useState(false);
+  // ─── Add this near the top with other state ───────────────────────────────────
+const [copied, setCopied] = useState(false);
+const [snippetFramework, setSnippetFramework] = useState<"html" | "nextjs" | "react">("html");
   const [darkPreview, setDarkPreview] = useState(false);
   const [downloading, setDownloading] = useState(false);
   const [historyKey, setHistoryKey] = useState(0);
-  const [hasHistory, setHasHistory] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   const update = useCallback(
@@ -332,19 +328,22 @@ export default function FaviconGenerator() {
     []
   );
 
-  // Check if history exists on mount
   useEffect(() => {
-    setHasHistory(loadHistory().length > 0);
-  }, [historyKey]);
+    setHistoryKey((k) => k);
+  }, []);
 
-  // Redraw canvas on config/custom change
   useEffect(() => {
     if (canvasRef.current) {
-      drawFavicon(canvasRef.current, config, CANVAS_SIZE, customContent, customText);
+      drawFavicon(
+        canvasRef.current,
+        config,
+        CANVAS_SIZE,
+        customContent,
+        customText
+      );
     }
   }, [config, customContent, customText]);
 
-  // Auto-save to history (debounced)
   useEffect(() => {
     const timer = setTimeout(() => {
       if (!canvasRef.current) return;
@@ -355,11 +354,17 @@ export default function FaviconGenerator() {
           : config.inputMode === "icon"
           ? config.selectedIcon
           : customContent?.name || "Custom";
-      saveToHistory(dataUrl, label, config as unknown as Record<string, unknown>);
+      saveToHistory(
+        dataUrl,
+        label,
+        config as unknown as Record<string, unknown>
+      );
       setHistoryKey((k) => k + 1);
     }, 1500);
     return () => clearTimeout(timer);
   }, [config, customContent, customText]);
+
+  // ─── Snippets ──────────────────────────────────────────────────────────────
 
   const htmlSnippet = `<!-- Favicon — Generated by FaviconKit -->
 <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
@@ -367,6 +372,78 @@ export default function FaviconGenerator() {
 <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
 <link rel="manifest" href="/site.webmanifest">
 <meta name="theme-color" content="${config.bgColor}">`;
+
+  const nextjsSnippet = `// app/layout.tsx
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  icons: {
+    icon: [
+      { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
+      { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+      { url: "/favicon-96x96.png", sizes: "96x96", type: "image/png" },
+    ],
+    apple: [
+      { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
+    ],
+    other: [
+      { rel: "mask-icon", url: "/favicon-32x32.png" },
+    ],
+  },
+  manifest: "/site.webmanifest",
+  themeColor: "${config.bgColor}",
+};
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <html lang="en">
+      <body>{children}</body>
+    </html>
+  );
+}`;
+
+  const reactSnippet = `<!-- public/index.html — paste inside <head> -->
+<!-- Favicon — Generated by FaviconKit -->
+<link rel="icon" type="image/png" sizes="32x32"
+  href="%PUBLIC_URL%/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16"
+  href="%PUBLIC_URL%/favicon-16x16.png">
+<link rel="apple-touch-icon" sizes="180x180"
+  href="%PUBLIC_URL%/apple-touch-icon.png">
+<link rel="manifest" href="%PUBLIC_URL%/site.webmanifest">
+<meta name="theme-color" content="${config.bgColor}">
+
+// ── Or with react-helmet-async in App.tsx ──────────────
+import { Helmet } from "react-helmet-async";
+
+function App() {
+  return (
+    <>
+      <Helmet>
+        <link rel="icon" type="image/png" sizes="32x32"
+          href="/favicon-32x32.png" />
+        <link rel="icon" type="image/png" sizes="16x16"
+          href="/favicon-16x16.png" />
+        <link rel="apple-touch-icon" sizes="180x180"
+          href="/apple-touch-icon.png" />
+        <link rel="manifest" href="/site.webmanifest" />
+        <meta name="theme-color" content="${config.bgColor}" />
+      </Helmet>
+      {/* rest of your app */}
+    </>
+  );
+}`;
+
+  const activeSnippet =
+    snippetFramework === "nextjs"
+      ? nextjsSnippet
+      : snippetFramework === "react"
+      ? reactSnippet
+      : htmlSnippet;
 
   const manifestContent = JSON.stringify(
     {
@@ -392,7 +469,7 @@ export default function FaviconGenerator() {
     2
   );
 
-  // ── Download ────────────────────────────────────────────────────────────
+  // ─── Download ──────────────────────────────────────────────────────────────
 
   const handleDownload = async () => {
     setDownloading(true);
@@ -415,33 +492,41 @@ export default function FaviconGenerator() {
 
       for (const size of EXPORT_SIZES) {
         const offscreen = document.createElement("canvas");
-        await drawFavicon(offscreen, config, size, customContent, customText);
+        await drawFavicon(
+          offscreen,
+          config,
+          size,
+          customContent,
+          customText
+        );
         const blob = await new Promise<Blob>((res) =>
           offscreen.toBlob((b) => res(b!), "image/png")
         );
         folder.file(sizeNames[size], blob);
-
-        // Collect 16, 32, 48 for ICO
-        if ([16, 32, 48].includes(size)) {
-          icoCanvases.push(offscreen);
-        }
+        if ([16, 32, 48].includes(size)) icoCanvases.push(offscreen);
       }
 
-      // Build ICO
       const icoBlob = await buildIco(icoCanvases);
       folder.file("favicon.ico", icoBlob);
-
       folder.file("site.webmanifest", manifestContent);
       folder.file(
         "README.txt",
         `FAVICON PACKAGE — Generated by FaviconKit
 ==========================================
 
-STEP 1: Upload all .png files, favicon.ico, and site.webmanifest to your website root directory.
+STEP 1: Upload all .png files, favicon.ico, and site.webmanifest
+        to your website root directory.
 
-STEP 2: Paste this into your <head>:
+STEP 2: Add to your project:
 
+── HTML ──────────────────────────────────
 ${htmlSnippet}
+
+── Next.js (app/layout.tsx) ──────────────
+${nextjsSnippet}
+
+── React (public/index.html) ─────────────
+${reactSnippet}
 
 STEP 3: Done. Your favicon is live.
 
@@ -458,15 +543,15 @@ For Webflow: upload via Site Settings > Favicon
     }
   };
 
-  // ── Copy ─────────────────────────────────────────────────────────────────
+  // ─── Copy ──────────────────────────────────────────────────────────────────
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(htmlSnippet);
+    navigator.clipboard.writeText(activeSnippet);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
 
-  // ── Restore from history ─────────────────────────────────────────────────
+  // ─── Restore history ───────────────────────────────────────────────────────
 
   const handleRestore = (cfg: Record<string, unknown>) => {
     setConfig(cfg as unknown as FaviconConfig);
@@ -511,7 +596,7 @@ For Webflow: upload via Site Settings > Favicon
             </div>
 
             <div className="p-6">
-              {/* Mock browser chrome */}
+              {/* Mock browser */}
               <div
                 className={`rounded-xl border ${
                   darkPreview
@@ -625,18 +710,15 @@ For Webflow: upload via Site Settings > Favicon
             </div>
           </Card>
 
-          {/* HTML snippet card */}
+          {/* ── Installation Snippet card ── */}
           <Card className="overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm">
             <div className="flex items-center justify-between border-b border-zinc-100 px-5 py-4">
               <div>
                 <p className="text-sm font-semibold text-zinc-900">
-                  HTML Snippet
+                  Installation Snippet
                 </p>
                 <p className="text-xs text-zinc-400">
-                  Paste into your{" "}
-                  <code className="rounded bg-zinc-100 px-1 font-mono text-zinc-600">
-                    &lt;head&gt;
-                  </code>
+                  Paste into your project — pick your framework
                 </p>
               </div>
               <Button
@@ -661,9 +743,84 @@ For Webflow: upload via Site Settings > Favicon
                 )}
               </Button>
             </div>
+
+            {/* Framework tabs */}
+            <div className="flex gap-1 border-b border-zinc-100 px-5 py-3">
+              {(
+                [
+                  { id: "html", label: "HTML", icon: "🌐" },
+                  { id: "nextjs", label: "Next.js", icon: "▲" },
+                  { id: "react", label: "React", icon: "⚛" },
+                ] as { id: SnippetFramework; label: string; icon: string }[]
+              ).map((fw) => (
+                <button
+                  key={fw.id}
+                  onClick={() => {
+                    setSnippetFramework(fw.id);
+                    setCopied(false);
+                  }}
+                  className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition ${
+                    snippetFramework === fw.id
+                      ? "bg-zinc-900 text-white"
+                      : "text-zinc-500 hover:bg-zinc-100 hover:text-zinc-800"
+                  }`}
+                >
+                  <span className="text-[11px]">{fw.icon}</span>
+                  {fw.label}
+                </button>
+              ))}
+            </div>
+
+            {/* Context hint */}
+            <div className="border-b border-zinc-100 bg-zinc-50 px-5 py-2.5">
+              {snippetFramework === "html" && (
+                <p className="text-xs text-zinc-400">
+                  Paste inside your{" "}
+                  <code className="rounded bg-zinc-200 px-1 font-mono text-zinc-600">
+                    &lt;head&gt;
+                  </code>{" "}
+                  tag. Upload all files to your website root.
+                </p>
+              )}
+              {snippetFramework === "nextjs" && (
+                <p className="text-xs text-zinc-400">
+                  Add to{" "}
+                  <code className="rounded bg-zinc-200 px-1 font-mono text-zinc-600">
+                    app/layout.tsx
+                  </code>{" "}
+                  via the{" "}
+                  <code className="rounded bg-zinc-200 px-1 font-mono text-zinc-600">
+                    metadata
+                  </code>{" "}
+                  export. Place all files in{" "}
+                  <code className="rounded bg-zinc-200 px-1 font-mono text-zinc-600">
+                    /public
+                  </code>
+                  .
+                </p>
+              )}
+              {snippetFramework === "react" && (
+                <p className="text-xs text-zinc-400">
+                  Add to{" "}
+                  <code className="rounded bg-zinc-200 px-1 font-mono text-zinc-600">
+                    public/index.html
+                  </code>{" "}
+                  or use{" "}
+                  <code className="rounded bg-zinc-200 px-1 font-mono text-zinc-600">
+                    react-helmet-async
+                  </code>
+                  . Place all files in{" "}
+                  <code className="rounded bg-zinc-200 px-1 font-mono text-zinc-600">
+                    /public
+                  </code>
+                  .
+                </p>
+              )}
+            </div>
+
             <div className="p-5">
               <pre className="overflow-x-auto rounded-xl bg-zinc-950 p-4 text-xs leading-relaxed text-zinc-300">
-                <code>{htmlSnippet}</code>
+                <code>{activeSnippet}</code>
               </pre>
             </div>
           </Card>
@@ -695,10 +852,7 @@ For Webflow: upload via Site Settings > Favicon
           </Button>
 
           {/* History */}
-          <FaviconHistory
-            key={historyKey}
-            onRestore={handleRestore}
-          />
+          <FaviconHistory key={historyKey} onRestore={handleRestore} />
         </div>
 
         {/* ── Right col — controls ── */}
@@ -937,7 +1091,6 @@ For Webflow: upload via Site Settings > Favicon
               </div>
             </div>
 
-            {/* Text / font color — show for text mode and custom font mode */}
             {(config.inputMode === "text" ||
               (config.inputMode === "custom" &&
                 customContent?.type === "font")) && (
@@ -968,7 +1121,6 @@ For Webflow: upload via Site Settings > Favicon
               </div>
             )}
 
-            {/* Font weight — text mode and custom font mode */}
             {(config.inputMode === "text" ||
               (config.inputMode === "custom" &&
                 customContent?.type === "font")) && (
@@ -999,7 +1151,6 @@ For Webflow: upload via Site Settings > Favicon
               </div>
             )}
 
-            {/* Size slider */}
             <div className="mb-4">
               <div className="mb-2 flex items-center justify-between">
                 <span className="text-xs text-zinc-500">Size</span>
@@ -1016,7 +1167,6 @@ For Webflow: upload via Site Settings > Favicon
               />
             </div>
 
-            {/* Padding slider */}
             <div>
               <div className="mb-2 flex items-center justify-between">
                 <span className="text-xs text-zinc-500">Padding</span>
